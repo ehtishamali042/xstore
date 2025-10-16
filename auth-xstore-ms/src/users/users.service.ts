@@ -17,6 +17,7 @@ export class UsersService {
       id: '1',
       name: 'John Doe',
       email: 'john@example.com',
+      password: 'temp123', // Will be replaced during registration
       role: 'admin',
       createdAt: new Date('2024-01-01'),
     },
@@ -24,6 +25,7 @@ export class UsersService {
       id: '2',
       name: 'Jane Smith',
       email: 'jane@example.com',
+      password: 'temp123', // Will be replaced during registration
       role: 'user',
       createdAt: new Date('2024-01-02'),
     },
@@ -31,6 +33,7 @@ export class UsersService {
       id: '3',
       name: 'Bob Wilson',
       email: 'bob@example.com',
+      password: 'temp123', // Will be replaced during registration
       role: 'user',
       createdAt: new Date('2024-01-03'),
     },
@@ -56,6 +59,12 @@ export class UsersService {
     return user;
   }
 
+  // GET one user by email (for authentication)
+  findByEmail(email: string): User | undefined {
+    this.logger.log(`Searching for user with email: ${email}`, 'UsersService');
+    return this.users.find((user) => user.email === email);
+  }
+
   // CREATE a new user
   create(createUserDto: CreateUserDto): User {
     this.logger.log(
@@ -66,6 +75,7 @@ export class UsersService {
       id: String(this.users.length + 1),
       name: createUserDto.name,
       email: createUserDto.email,
+      password: createUserDto.password, // Password should already be hashed by AuthService
       role: createUserDto.role || 'user',
       createdAt: new Date(),
     };
