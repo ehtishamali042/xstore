@@ -3,6 +3,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoggerService } from '../common/logger/logger.service';
 import { EmailService } from '../common/email/email.service';
+import { Role } from '../auth/enums/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,7 @@ export class UsersService {
       name: 'John Doe',
       email: 'john@example.com',
       password: 'temp123', // Will be replaced during registration
-      role: 'admin',
+      role: Role.ADMIN,
       createdAt: new Date('2024-01-01'),
     },
     {
@@ -26,7 +27,7 @@ export class UsersService {
       name: 'Jane Smith',
       email: 'jane@example.com',
       password: 'temp123', // Will be replaced during registration
-      role: 'user',
+      role: Role.USER,
       createdAt: new Date('2024-01-02'),
     },
     {
@@ -34,7 +35,7 @@ export class UsersService {
       name: 'Bob Wilson',
       email: 'bob@example.com',
       password: 'temp123', // Will be replaced during registration
-      role: 'user',
+      role: Role.USER,
       createdAt: new Date('2024-01-03'),
     },
   ];
@@ -76,7 +77,7 @@ export class UsersService {
       name: createUserDto.name,
       email: createUserDto.email,
       password: createUserDto.password, // Password should already be hashed by AuthService
-      role: createUserDto.role || 'user',
+      role: createUserDto.role || Role.USER,
       createdAt: new Date(),
     };
     this.users.push(newUser);

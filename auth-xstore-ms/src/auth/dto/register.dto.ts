@@ -1,4 +1,11 @@
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
+import { Role } from '../enums/role.enum';
 
 /**
  * 📚 Learning: DTO Validation with class-validator
@@ -18,7 +25,9 @@ export class RegisterDto {
   @MinLength(6, { message: 'Password must be at least 6 characters' })
   password: string;
 
-  @IsString()
+  @IsEnum(Role, {
+    message: `role must be one of: ${Object.values(Role).join(', ')}`,
+  })
   @IsOptional() // Optional field
-  role?: string; // Optional, defaults to 'user'
+  role?: Role; // Optional, defaults to 'user'
 }

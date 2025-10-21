@@ -44,7 +44,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * - Check if user has required permissions
    */
   validate(payload: { sub: string; email: string; role: string }): User {
+    console.log('🚀 ~ JwtStrategy ~ validate ~ validate before firstline:');
     const user = this.authService.validateToken(payload);
+    console.log('🚀 ~ JwtStrategy ~ validate ~ user:', user);
 
     if (!user) {
       throw new UnauthorizedException('User not found or token invalid');

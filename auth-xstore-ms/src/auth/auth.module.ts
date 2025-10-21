@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RolesGuard } from './guards/roles.guard';
 import { UsersModule } from '../users/users.module';
 
 /**
@@ -50,10 +51,11 @@ import { UsersModule } from '../users/users.module';
   // Providers available in this module
   // AuthService: business logic
   // JwtStrategy: how to validate JWT tokens
-  providers: [AuthService, JwtStrategy],
+  // RolesGuard: role-based authorization
+  providers: [AuthService, JwtStrategy, RolesGuard],
 
-  // Export AuthService and JwtStrategy so other modules can use them
-  // This allows other modules to validate tokens and check authentication
-  exports: [AuthService, JwtStrategy, PassportModule],
+  // Export AuthService, JwtStrategy, and RolesGuard so other modules can use them
+  // This allows other modules to validate tokens, check authentication, and check roles
+  exports: [AuthService, JwtStrategy, RolesGuard, PassportModule],
 })
 export class AuthModule {}

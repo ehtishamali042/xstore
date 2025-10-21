@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { Public } from './decorators/public.decorator';
 
 /**
  * 🎮 AUTH CONTROLLER - Handles authentication endpoints
@@ -11,8 +12,10 @@ import { AuthResponseDto } from './dto/auth-response.dto';
  * 1. Public Routes: These don't require authentication (anyone can signup/signin)
  * 2. HTTP Status Codes: 200 for login, 201 for registration
  * 3. DTO Validation: Automatic validation of incoming data
+ * 4. @Public() Decorator: Marks routes as public when JwtAuthGuard is global
  */
 @Controller('auth')
+@Public() // ← All auth routes are public (no authentication required)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

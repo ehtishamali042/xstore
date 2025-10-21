@@ -10,6 +10,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { User } from '../users/entities/user.entity';
+import { Role } from './enums/role.enum';
 
 /**
  * 🔐 AUTH SERVICE - The brain of authentication
@@ -51,7 +52,7 @@ export class AuthService {
       name: registerDto.name,
       email: registerDto.email,
       password: hashedPassword,
-      role: registerDto.role || 'user',
+      role: registerDto.role || Role.USER, // Default to 'user' role
     });
 
     // Generate JWT token
@@ -134,6 +135,7 @@ export class AuthService {
    */
   validateToken(payload: { sub: string; email: string; role: string }): User {
     // Payload contains: { sub: userId, email, role }
+    console.log('🚀 ~ AuthService ~ validateToken ~ validateToken:');
     return this.usersService.findOne(payload.sub);
   }
 }
