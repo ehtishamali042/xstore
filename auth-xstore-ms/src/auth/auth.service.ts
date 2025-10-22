@@ -127,15 +127,4 @@ export class AuthService {
 
     return user;
   }
-
-  /**
-   * VALIDATE TOKEN - Verify JWT token is valid
-   * Used by Passport JWT Strategy
-   * This is called automatically when a protected route is accessed
-   */
-  validateToken(payload: { sub: string; email: string; role: string }): User {
-    // Payload contains: { sub: userId, email, role }
-    console.log('🚀 ~ AuthService ~ validateToken ~ validateToken:');
-    return this.usersService.findOne(payload.sub);
-  }
 }

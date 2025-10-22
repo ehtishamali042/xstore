@@ -1,60 +1,94 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import { validateToken } from '@xstore/auth-utils';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
- * 🛡️ JWT AUTH GUARD - Protects routes requiring authentication
+ * 🔒 CUSTOM JWT AUTH GUARD using @xstore/auth-utils
  *
- * 📚 Learning: What are Guards?
- * - Guards determine whether a request should be handled by the route
- * - They execute BEFORE the route handler
- * - If guard returns true → request proceeds
- * - If guard returns false → request is rejected (401 Unauthorized)
+ * This guard validates JWTs using the shared auth-utils package.
+ * It replaces Passport's AuthGuard('jwt') to demonstrate direct usage of validateToken.
  *
- * 📚 Learning: Global Guards with @Public() Decorator
- * - When used as a global guard, it protects ALL routes by default
- * - Use @Public() decorator to mark routes as public (no auth required)
- * - Checks for @Public() metadata before enforcing authentication
+ * Features:
+ * - Extracts Bearer token from Authorization header
+ * - Uses validateToken from @xstore/auth-utils for verification
+ * - Respects @Public() decorator
+ * - Sets req.user with decoded payload
  *
- * How to use:
- * @UseGuards(JwtAuthGuard)  // or just use it globally
- * async getProfile(@Request() req) {
- *   return req.user; // User from JWT token
- * }
- *
- * Mark routes as public:
- * @Public()
- * @Post('login')
- * login() { ... }  // No authentication required
- *
- * 🔍 What happens when this guard is applied:
- * 1. Check if route has @Public() decorator → skip auth
- * 2. Guard extracts JWT token from request
- * 3. JwtStrategy validates the token
- * 4. If valid, user is attached to request (req.user)
- * 5. If invalid, 401 Unauthorized is returned
+ * 📚 Learning: Why we replaced Passport
+ * - Previously: AuthGuard('jwt') used Passport JWT strategy
+ * - Now: Direct validation using @xstore/auth-utils
+ * - Benefit: Same validation logic across all microservices
  */
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
+export class JwtAuthGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
 
-  canActivate(context: ExecutionContext) {
-    // Check if route is marked as public
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Check if route is marked as @Public()
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(), // Method level @Public()
-      context.getClass(), // Controller level @Public()
+      context.getHandler(),
+      context.getClass(),
     ]);
 
     if (isPublic) {
       console.log('🔓 Public route - skipping authentication');
-      return true; // Skip authentication for public routes
+      return true;
     }
 
-    // Call the parent class's canActivate (which uses JwtStrategy)
-    console.log('🔐 Protected route - checking authentication');
-    return super.canActivate(context);
+    console.log('🔐 Protected route - validating JWT with @xstore/auth-utils');
+
+    const request = context.switchToHttp().getRequest<Request>();
+    const token = this.extractTokenFromHeader(request);
+
+    if (!token) {
+      throw new UnauthorizedException('No token provided');
+    }
+
+    try {
+      // 🎯 USING @xstore/auth-utils validateToken!
+      const secret =
+        process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+      const result = await validateToken(token, secret);
+
+      if (!result.valid || !result.payload) {
+        throw new UnauthorizedException(result.error || 'Invalid token');
+      }
+
+      console.log('✅ Token validated successfully:', result.payload.email);
+
+      // Attach user payload to request
+      (request as any).user = result.payload;
+      return true;
+    } catch (error) {
+      console.error('❌ Token validation failed:', error);
+      throw new UnauthorizedException(
+        error instanceof Error ? error.message : 'Token validation failed',
+      );
+    }
+  }
+
+  /**
+   * Extract Bearer token from Authorization header
+   */
+  private extractTokenFromHeader(request: Request): string | null {
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return null;
+    }
+
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2) {
+      return null;
+    }
+
+    const [type, token] = parts;
+    return type === 'Bearer' ? token : null;
   }
 }

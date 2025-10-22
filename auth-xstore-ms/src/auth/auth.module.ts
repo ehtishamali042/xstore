@@ -1,44 +1,35 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { UsersModule } from '../users/users.module';
 
 /**
- * 🏗️ AUTH MODULE - Central authentication module
+ * 🏗️ AUTH MODULE - Authentication module using @xstore/auth-utils
  *
- * 📚 Learning: Module Organization
- * 1. Imports: External modules this module depends on
- * 2. Controllers: HTTP endpoints for this module
- * 3. Providers: Services and strategies available in this module
- * 4. Exports: What other modules can use from this module
+ * 📚 Learning: Removed Passport Dependency
+ * - Previously: Used PassportModule and JwtStrategy
+ * - Now: Using @xstore/auth-utils validateToken in JwtAuthGuard
+ * - Benefit: Direct control over JWT validation, shared logic across microservices
  *
- * Key Concepts Demonstrated:
- * - JWT Configuration: Secret key, token expiration
- * - Passport Integration: Using passport-jwt strategy
- * - Module Dependencies: Importing UsersModule to access UsersService
- * - Service Export: Exporting AuthService so other modules can use it
+ * What's still here:
+ * - JwtModule: For generating tokens (login/register)
+ * - AuthService: Business logic for auth operations
+ * - UsersModule: Access to user data
  */
 @Module({
   imports: [
     // Import UsersModule to access UsersService in AuthService
-    // This demonstrates inter-module dependency!
     UsersModule,
 
-    // Register Passport with default strategy as 'jwt'
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-
-    // Configure JWT module
+    // Configure JWT module for TOKEN GENERATION (not validation)
     JwtModule.register({
-      // 🔑 Secret key to sign tokens (MUST be same in JwtStrategy)
-      // ⚠️ In production: Use environment variables, not hardcoded!
+      // 🔑 Secret key to sign tokens
+      // ⚠️ Must match the secret used in @xstore/auth-utils validateToken
       secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
 
       // Token expiration time
-      // '1h' = 1 hour, '7d' = 7 days, '60s' = 60 seconds
       signOptions: {
         expiresIn: '24h', // Token valid for 24 hours
       },
@@ -49,13 +40,11 @@ import { UsersModule } from '../users/users.module';
   controllers: [AuthController],
 
   // Providers available in this module
-  // AuthService: business logic
-  // JwtStrategy: how to validate JWT tokens
+  // AuthService: business logic for authentication
   // RolesGuard: role-based authorization
-  providers: [AuthService, JwtStrategy, RolesGuard],
+  providers: [AuthService, RolesGuard],
 
-  // Export AuthService, JwtStrategy, and RolesGuard so other modules can use them
-  // This allows other modules to validate tokens, check authentication, and check roles
-  exports: [AuthService, JwtStrategy, RolesGuard, PassportModule],
+  // Export AuthService and RolesGuard so other modules can use them
+  exports: [AuthService, RolesGuard],
 })
 export class AuthModule {}

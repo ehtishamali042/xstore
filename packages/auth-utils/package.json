@@ -1,0 +1,28 @@
+{
+  "name": "@xstore/auth-utils",
+  "version": "1.0.0",
+  "description": "Lightweight JWT validation utilities for XStore microservices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "jwt",
+    "authentication",
+    "microservices",
+    "xstore"
+  ],
+  "author": "XStore Team",
+  "license": "MIT",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
