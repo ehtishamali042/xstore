@@ -19,21 +19,10 @@ import { Role } from 'src/auth/enums/role.enum';
  * 🔒 PROTECTED USERS CONTROLLER
  *
  * 📚 Learning: Global Guards
- * - BOTH JwtAuthGuard and RolesGuard are now GLOBAL (registered in app.module.ts)
+ * - BOTH JwtAuthGuard and RolesGuard are GLOBAL (registered in app.module.ts)
  * - ALL routes are automatically protected by JwtAuthGuard
- * - No need for @UseGuards() decorator anymore!
  * - Use @Public() to mark routes as public (no auth required)
  * - Use @Roles() to add role-based access control
- *
- * Guard Execution Flow:
- * 1. Global JwtAuthGuard → authenticates user, sets req.user
- * 2. Global RolesGuard → checks roles (if @Roles() present)
- * 3. Route Handler → your code executes
- *
- * How to protect routes:
- * - Authentication (default): No decorator needed - all routes protected
- * - Public route: @Public()
- * - Role-based: @Roles(Role.ADMIN)
  */
 @Controller('users')
 export class UsersController {
@@ -130,36 +119,6 @@ export class UsersController {
           timestamp: new Date(),
         },
       },
-    };
-  }
-
-  /**
-   * 🔐 ADMIN OR NETSECOPS ROUTE - Multiple Roles Example
-   *
-   * GET /users/admin/activity - Get user activity logs
-   *
-   * @Roles(Role.ADMIN, Role.NETSECOPS)
-   * - Accepts multiple roles (OR condition)
-   * - User with EITHER 'admin' OR 'netsecops' role can access
-   * - Global guards automatically enforce authentication and roles
-   */
-  @Get('admin/activity')
-  @Roles(Role.ADMIN, Role.NETSECOPS) // ← Admin OR NetSecOps (both guards are global!)
-  getUserActivity(@Request() req: { user: User }): {
-    message: string;
-    accessGrantedTo: string;
-    recentActivity: string[];
-  } {
-    console.log(`🔐 ${req.user.role} ${req.user.email} accessed activity logs`);
-
-    return {
-      message: 'User activity logs (Admin/Moderator access)',
-      accessGrantedTo: `${req.user.role} - ${req.user.email}`,
-      recentActivity: [
-        'User alice@example.com logged in',
-        'User john@example.com updated profile',
-        'Admin performed user deletion',
-      ],
     };
   }
 }
