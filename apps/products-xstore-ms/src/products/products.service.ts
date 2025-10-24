@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class ProductsService {
   private products: Product[] = [
     {
-      id: uuidv4(),
+      id: '1',
       name: 'Laptop',
       description: 'High-performance laptop for developers',
       price: 1299.99,
@@ -17,7 +17,7 @@ export class ProductsService {
       updatedAt: new Date(),
     },
     {
-      id: uuidv4(),
+      id: '2',
       name: 'Wireless Mouse',
       description: 'Ergonomic wireless mouse with long battery life',
       price: 29.99,
@@ -26,7 +26,7 @@ export class ProductsService {
       updatedAt: new Date(),
     },
     {
-      id: uuidv4(),
+      id: '3',
       name: 'Mechanical Keyboard',
       description: 'RGB mechanical keyboard with cherry MX switches',
       price: 149.99,
@@ -35,7 +35,7 @@ export class ProductsService {
       updatedAt: new Date(),
     },
     {
-      id: uuidv4(),
+      id: '4',
       name: 'USB-C Hub',
       description: '7-in-1 USB-C hub with multiple ports',
       price: 49.99,
@@ -44,7 +44,7 @@ export class ProductsService {
       updatedAt: new Date(),
     },
     {
-      id: uuidv4(),
+      id: '5',
       name: 'Monitor Stand',
       description: 'Adjustable monitor stand with storage',
       price: 79.99,
