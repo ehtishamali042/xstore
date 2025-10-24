@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import * as path from 'path';
 
 @Module({
-  imports: [ProductsModule, CommonModule],
+  imports: [
+    // Configure environment variables
+    ConfigModule.forRoot({
+      envFilePath: path.join(__dirname, '../../.env'),
+      isGlobal: true, // Makes ConfigService available everywhere
+    }),
+    ProductsModule,
+    CommonModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load .env from repository root
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 /**
  * 🚀 APPLICATION BOOTSTRAP
@@ -27,6 +32,10 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.AUTH_PORT || 3100);
+  console.log(
+    `🚀 Auth Microservice is running on: http://localhost:${process.env.AUTH_PORT || 3100}`,
+  );
 }
+
 void bootstrap();

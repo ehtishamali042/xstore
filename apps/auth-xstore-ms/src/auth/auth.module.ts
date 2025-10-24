@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { RolesGuard } from './guards/roles.guard';
@@ -24,15 +25,19 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
 
     // Configure JWT module for TOKEN GENERATION (not validation)
-    JwtModule.register({
-      // 🔑 Secret key to sign tokens
-      // ⚠️ Must match the secret used in @xstore/auth-utils validateToken
-      secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-
-      // Token expiration time
-      signOptions: {
-        expiresIn: '24h', // Token valid for 24 hours
-      },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        // 🔑 Secret key to sign tokens
+        // ⚠️ Must match the secret used in @xstore/auth-utils validateToken
+        secret:
+          configService.get<string>('JWT_SECRET') ||
+          'your-secret-key-change-in-production',
+        // Token expiration time
+        signOptions: {
+          expiresIn: '30d', // Token valid for 30 days
+        },
+      }),
     }),
   ],
 
@@ -48,3 +53,4 @@ import { UsersModule } from '../users/users.module';
   exports: [AuthService, RolesGuard],
 })
 export class AuthModule {}
+console.log('🚀 ~ process.env.JWT_SECRET:', process.env.JWT_SECRET);

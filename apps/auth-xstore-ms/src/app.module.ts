@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -8,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { InterceptorsModule } from './common/interceptors/interceptors.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import * as path from 'path';
 
 /**
  * 🏗️ ROOT APPLICATION MODULE
@@ -33,6 +35,11 @@ import { RolesGuard } from './auth/guards/roles.guard';
  */
 @Module({
   imports: [
+    // Configure environment variables
+    ConfigModule.forRoot({
+      envFilePath: path.join(__dirname, '../../.env'),
+      isGlobal: true, // Makes ConfigService available everywhere
+    }),
     LoggerModule, // ← Register logger globally
     InterceptorsModule, // ← Register HTTP logging interceptor globally
     AuthModule, // ← Add authentication module

@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load .env from repository root
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +25,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT ?? 3001;
+  const port = process.env.PRODUCTS_PORT || 3101;
   await app.listen(port);
   console.log(
     `🚀 Products Microservice is running on: http://localhost:${port}`,

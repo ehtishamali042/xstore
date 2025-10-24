@@ -4,10 +4,13 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { validateToken } from '@xstore/auth-utils';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  constructor(private configService: ConfigService) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
@@ -17,7 +20,8 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     const jwtSecret =
-      process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+      this.configService.get<string>('JWT_SECRET') ||
+      'your-secret-key-change-in-production';
     const result = await validateToken(authHeader, jwtSecret);
 
     if (!result.valid) {
