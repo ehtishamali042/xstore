@@ -3,9 +3,13 @@ import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { CacheService } from '../common/cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL } from '../common/cache/cache.constants';
 
 @Injectable()
 export class ProductsService {
+  constructor(private readonly cacheService: CacheService) {}
+
   private products: Product[] = [
     {
       id: '1',
@@ -63,24 +67,70 @@ export class ProductsService {
     };
 
     this.products.push(newProduct);
+
+    // Invalidate cache after creating a product
+    this.cacheService.del(CACHE_KEYS.PRODUCTS_ALL).catch((err) => {
+      console.error('Failed to invalidate cache:', err);
+    });
+
     return newProduct;
   }
 
-  findAll(): Product[] {
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    // Try to get from cache first
+    const cachedProducts = await this.cacheService.get<Product[]>(
+      CACHE_KEYS.PRODUCTS_ALL,
+    );
+
+    if (cachedProducts) {
+      console.log('Cache HIT: products:all');
+      return cachedProducts;
+    }
+
+    console.log('Cache MISS: products:all');
+
+    // If not in cache, get from "database" (in-memory array)
+    const products = this.products;
+
+    // Store in cache for next time
+    await this.cacheService.set(
+      CACHE_KEYS.PRODUCTS_ALL,
+      products,
+      CACHE_TTL.PRODUCTS_ALL * 1000,
+    );
+
+    return products;
   }
 
-  findOne(id: string): Product {
+  async findOne(id: string): Promise<Product> {
+    // Try to get from cache first
+    const cacheKey = CACHE_KEYS.PRODUCT(id);
+    const cachedProduct = await this.cacheService.get<Product>(cacheKey);
+
+    if (cachedProduct) {
+      console.log(`Cache HIT: product:${id}`);
+      return cachedProduct;
+    }
+
+    console.log(`Cache MISS: product:${id}`);
+
+    // If not in cache, get from "database"
     const product = this.products.find((p) => p.id === id);
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
+    // Store in cache for next time
+    await this.cacheService.set(cacheKey, product, CACHE_TTL.PRODUCT * 1000);
+
     return product;
   }
 
-  update(id: string, updateProductDto: UpdateProductDto): Product {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
     const productIndex = this.products.findIndex((p) => p.id === id);
 
     if (productIndex === -1) {
@@ -94,10 +144,17 @@ export class ProductsService {
     };
 
     this.products[productIndex] = updatedProduct;
+
+    // Invalidate cache after update
+    await Promise.all([
+      this.cacheService.del(CACHE_KEYS.PRODUCT(id)),
+      this.cacheService.del(CACHE_KEYS.PRODUCTS_ALL),
+    ]);
+
     return updatedProduct;
   }
 
-  remove(id: string): { message: string } {
+  async remove(id: string): Promise<{ message: string }> {
     const productIndex = this.products.findIndex((p) => p.id === id);
 
     if (productIndex === -1) {
@@ -105,6 +162,13 @@ export class ProductsService {
     }
 
     this.products.splice(productIndex, 1);
+
+    // Invalidate cache after delete
+    await Promise.all([
+      this.cacheService.del(CACHE_KEYS.PRODUCT(id)),
+      this.cacheService.del(CACHE_KEYS.PRODUCTS_ALL),
+    ]);
+
     return { message: `Product with ID ${id} has been deleted` };
   }
 }

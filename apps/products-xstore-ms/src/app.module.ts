@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
+import { CacheModule } from './common/cache/cache.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import * as path from 'path';
 
@@ -15,6 +16,7 @@ import * as path from 'path';
       envFilePath: path.join(__dirname, '../../.env'),
       isGlobal: true, // Makes ConfigService available everywhere
     }),
+    CacheModule, // Add Redis cache
     ProductsModule,
     CommonModule,
   ],

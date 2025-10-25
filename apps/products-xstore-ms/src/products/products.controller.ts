@@ -26,27 +26,28 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Req() req: any): Product[] {
+  async findAll(@Req() req: any): Promise<Product[]> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     console.log('User from request:', req?.user);
     return this.productsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Product {
+  async findOne(@Param('id') id: string): Promise<Product> {
     return this.productsService.findOne(id);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
-  ): Product {
+  ): Promise<Product> {
     return this.productsService.update(id, updateProductDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string): { message: string } {
+  async remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.productsService.remove(id);
   }
 }
