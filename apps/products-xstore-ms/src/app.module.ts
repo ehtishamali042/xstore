@@ -13,8 +13,8 @@ import * as path from 'path';
   imports: [
     // Configure environment variables
     ConfigModule.forRoot({
-      envFilePath: path.join(__dirname, '../../.env'),
-      isGlobal: true, // Makes ConfigService available everywhere
+      envFilePath: path.join(__dirname, '../../../.env'), // Correct path to root .env
+      isGlobal: true,
     }),
     CacheModule, // Add Redis cache
     ProductsModule,

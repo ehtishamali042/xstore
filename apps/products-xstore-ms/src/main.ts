@@ -1,11 +1,10 @@
+import { loadEnv } from './bootstrap/load-env';
+loadEnv();
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+// Import AppModule after dotenv so ConfigModule and Prisma can read env vars
 import { AppModule } from './app.module';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
-
-// Load .env from repository root
-dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

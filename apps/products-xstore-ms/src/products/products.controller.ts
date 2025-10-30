@@ -21,7 +21,7 @@ export class ProductsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createProductDto: CreateProductDto): Product {
+  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productsService.create(createProductDto);
   }
 
