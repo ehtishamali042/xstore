@@ -17,6 +17,10 @@ export class ProductsService {
     const newProduct = await this.prisma.product.create({
       data: createProductDto,
     });
+
+    // Invalidate cache after creating a new product
+    await this.cacheService.del(CACHE_KEYS.PRODUCTS_ALL);
+
     return ProductsService.toEntity(newProduct);
   }
 
